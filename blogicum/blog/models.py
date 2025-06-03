@@ -54,9 +54,7 @@ class Post(models.Model):
         ),
     )
     author = models.ForeignKey(
-        User,
-        verbose_name="Автор публикации",
-        on_delete=models.CASCADE
+        User, verbose_name="Автор публикации", on_delete=models.CASCADE
     )
     location = models.ForeignKey(
         Location,
@@ -80,7 +78,7 @@ class Post(models.Model):
 
     image = models.ImageField(  # 👈 добавлено правильно
         "Изображение",
-        upload_to='posts_images/',
+        upload_to="posts_images/",
         blank=True,
         null=True,
     )
@@ -91,24 +89,21 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
-    
+
+
 class Comment(models.Model):
     post = models.ForeignKey(
         Post,
         verbose_name="Публикация",
         on_delete=models.CASCADE,
-        related_name="comments"
+        related_name="comments",
     )
     author = models.ForeignKey(
-        User,
-        verbose_name="Автор комментария",
-        on_delete=models.CASCADE
+        User, verbose_name="Автор комментария", on_delete=models.CASCADE
     )
     text = models.TextField("Текст комментария")
-    created_at = models.DateTimeField(
-        "Дата публикации комментария",
-        auto_now_add=True
-    )
+    created_at = models.DateTimeField("Дата публикации комментария",
+                                      auto_now_add=True)
 
     class Meta:
         verbose_name = "комментарий"
