@@ -1,56 +1,29 @@
 {% extends "base.html" %}
-
 {% block title %}
-  Страница пользователя {{ profile.username }}
+  Страница пользователя {{ profile }}
 {% endblock %}
-
 {% block content %}
-  <h1 class="mb-5 text-center">
-    Страница пользователя {{ profile.username }}
-  </h1>
-
+  <h1 class="mb-5 text-center ">Страница пользователя {{ profile }}</h1>
   <small>
     <ul class="list-group list-group-horizontal justify-content-center mb-3">
-      <li class="list-group-item text-muted">
-        Имя пользователя:
-        {# 1) если есть и имя, и фамилия — выводим их #}
-        {% if profile.get_full_name %}
-          {{ profile.get_full_name }}
-        {# 2) иначе выводим просто first_name (его и ищут тесты) #}
-        {% elif profile.first_name %}
-          {{ profile.first_name }}
-        {# 3) резерв #}
-        {% else %}
-          не указано
-        {% endif %}
-      </li>
-      <li class="list-group-item text-muted">
-        Регистрация: {{ profile.date_joined|date:"d E Y" }}
-      </li>
-      <li class="list-group-item text-muted">
-        Роль: {{ profile.is_staff|yesno:"Админ,Пользователь" }}
-      </li>
+      <li class="list-group-item text-muted">Имя пользователя:
+        {% if profile.get_full_name %}{{ profile.get_full_name }}{% else %}не указано{% endif %}</li>
+      <li class="list-group-item text-muted">Регистрация: {{ profile.date_joined }}</li>
+      <li class="list-group-item text-muted">Роль: {% if profile.is_staff %}Админ{% else %}Пользователь{% endif %}</li>
     </ul>
-
-    {% if user.is_authenticated and user == profile %}
-      <a class="btn btn-sm text-muted"
-         href="{% url 'users:profile_edit' profile.username %}">
-        Редактировать профиль
-      </a>
-      <a class="btn btn-sm text-muted"
-         href="{% url 'password_change' %}">
-        Изменить пароль
-      </a>
-    {% endif %}
+    <ul class="list-group list-group-horizontal justify-content-center">
+      {% if user.is_authenticated and request.user == profile %}
+        <a class="btn btn-sm text-muted" href="{% url 'blog:edit_profile' %}">Редактировать профиль</a>
+        <a class="btn btn-sm text-muted" href="{% url 'password_change' %}">Изменить пароль</a>
+      {% endif %}
+    </ul>
   </small>
-
+  <br>
   <h3 class="mb-5 text-center">Публикации пользователя</h3>
-
   {% for post in page_obj %}
     <article class="mb-5">
       {% include "includes/post_card.html" %}
     </article>
   {% endfor %}
-
   {% include "includes/paginator.html" %}
 {% endblock %}
