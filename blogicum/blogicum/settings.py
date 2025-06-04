@@ -143,3 +143,5 @@ TEMPLATES[0]["DIRS"] = [os.path.join(BASE_DIR, "templates")]
 HANDLER403 = "pages.views.csrf_failure_view"
 HANDLER404 = "pages.views.page_not_found_view"
 HANDLER500 = "pages.views.server_error_view"
+
+LOGIN_URL = "/auth/login/"

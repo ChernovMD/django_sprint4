@@ -26,6 +26,8 @@
           </small>
         </h6>
         <p class="card-text">{{ post.text|linebreaksbr }}</p>
+
+        {# --- ССЫЛКИ ДЛЯ АВТОРА СРАЗУ ПОСЛЕ ТЕКСТА ПОСТА --- #}
         {% if user == post.author %}
           <div class="mb-2">
             <a class="btn btn-sm text-muted" href="{% url 'blog:edit_post' post.id %}" role="button">
@@ -36,6 +38,8 @@
             </a>
           </div>
         {% endif %}
+
+        {# --- Только после этого блок комментариев! --- #}
         {% include "includes/comments.html" %}
       </div>
     </div>
