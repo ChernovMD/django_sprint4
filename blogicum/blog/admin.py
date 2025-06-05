@@ -93,3 +93,12 @@ class LocationAdmin(BlogAdmin):
         "is_published",
         "created_at",
     )
+
+
+@admin.register(Comment)
+class CommentAdminPanel(admin.ModelAdmin):
+    """Интерфейс для отдельного просмотра комментариев."""
+
+    list_display = ("text", "author", "post", "created_at")
+    readonly_fields = ("text", "author", "post", "created_at")
+    list_filter = ("author", "post")

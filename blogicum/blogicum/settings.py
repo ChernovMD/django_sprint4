@@ -29,7 +29,6 @@ INSTALLED_APPS = [
     "pages.apps.PagesConfig",
     "core.apps.CoreConfig",
     "django_bootstrap5",
-    "debug_toolbar",
 ]
 
 MIDDLEWARE = [
@@ -40,7 +39,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = "blogicum.urls"
@@ -107,6 +105,8 @@ STATICFILES_DIRS = [
 ]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+MEDIA_URL = '/media/'
 
 MEDIA_ROOT = BASE_DIR / "media"
 

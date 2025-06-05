@@ -100,6 +100,7 @@ class Post(BaseModel, BaseTitle):
     image = models.ImageField(
         upload_to="images",
         blank=True,
+        null=True,
         verbose_name="Изображение",
     )
 

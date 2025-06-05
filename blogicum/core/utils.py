@@ -24,6 +24,7 @@ def post_published_query():
     query_set = post_all_query().filter(
         pub_date__lte=timezone.now(),
         is_published=True,
+        category__isnull=False,  # <-- Важно!
         category__is_published=True,
     )
     return query_set

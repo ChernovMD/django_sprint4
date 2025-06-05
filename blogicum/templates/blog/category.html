@@ -5,6 +5,19 @@
 {% block content %}
   <h1 class="text-center">Публикации в категории - {{ category.title }}</h1>
   <p class="col-6 offset-3 mb-5 lead text-center">{{ category.description }}</p>
+
+  <div class="container mb-4">
+    <h4 class="text-center">Другие категории:</h4>
+    <div class="d-flex justify-content-center gap-2 flex-wrap">
+      {% for cat in extra_categories %}
+        <a class="btn btn-outline-primary {% if cat == category %}active{% endif %}"
+           href="{% url 'blog:category_posts' category_slug=cat.slug %}">
+          {{ cat.title }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+
   {% for post in page_obj %}
     <article class="mb-5">  
       {% include "includes/post_card.html" %}

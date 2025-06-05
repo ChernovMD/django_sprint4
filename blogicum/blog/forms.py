@@ -12,11 +12,17 @@ class UserEditForm(forms.ModelForm):
 
 
 class PostEditForm(forms.ModelForm):
-    """Форма редактирования поста."""
-
     class Meta:
         model = Post
-        exclude = ("author", "created_at")
+        fields = (
+            "title",
+            "text",
+            "image",
+            "category",
+            "location",
+            "is_published",  # ✅ добавлено
+            "pub_date",       # ✅ добавлено
+        )
         widgets = {
             "text": forms.Textarea({"rows": "5"}),
             "pub_date": forms.DateTimeInput(attrs={"type": "datetime-local"}),

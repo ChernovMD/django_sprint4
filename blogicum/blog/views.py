@@ -15,6 +15,7 @@ from core.utils import post_all_query, post_published_query, get_post_data
 from core.mixins import CommentMixinView
 from .models import Post, User, Category, Comment
 from .forms import UserEditForm, PostEditForm, CommentEditForm
+from django.utils import timezone
 
 
 class MainPostListView(ListView):
@@ -29,8 +30,10 @@ class MainPostListView(ListView):
 
     model = Post
     template_name = "blog/index.html"
-    queryset = post_published_query()
     paginate_by = 10
+
+    def get_queryset(self):
+        return post_published_query()
 
 
 class CategoryPostListView(MainPostListView):
@@ -51,14 +54,16 @@ class CategoryPostListView(MainPostListView):
 
     def get_queryset(self):
         slug = self.kwargs["category_slug"]
-        self.category = get_object_or_404(
-            Category, slug=slug, is_published=True
-        )
+        self.category = \
+            get_object_or_404(Category, slug=slug, is_published=True)
         return super().get_queryset().filter(category=self.category)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["category"] = self.category
+        context["extra_categories"] = Category.objects.filter(
+            slug__in=["news", "science", "travel"], is_published=True
+        )
         return context
 
 
@@ -121,9 +126,8 @@ class PostDetailView(DetailView):
         if self.check_post_data():
             context["flag"] = True
             context["form"] = CommentEditForm()
-        context["comments"] = self.object.comments.all().select_related(
-            "author"
-        )
+        context["comments"] = \
+            self.object.comments.all().select_related("author")
         return context
 
     def check_post_data(self):
@@ -186,6 +190,8 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
+        form.instance.pub_date = timezone.now()
+        form.instance.is_published = True
         return super().form_valid(form)
 
     def get_success_url(self):
