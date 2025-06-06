@@ -1,8 +1,8 @@
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from blog.models import Post
-from django.utils import timezone
 
 
 def post_all_query():
@@ -24,7 +24,7 @@ def post_published_query():
     query_set = post_all_query().filter(
         pub_date__lte=timezone.now(),
         is_published=True,
-        category__isnull=False,  # <-- Важно!
+        category__isnull=False,
         category__is_published=True,
     )
     return query_set
@@ -38,14 +38,14 @@ def get_post_data(post_data):
     постам дата публикации которых больше текущей даты.
     Проверяет:
         - Пост опубликован.
-        - Категория в которой находится поста опубликована.
+        - Категория в которой находится пост опубликована.
         - Дата поста не больше текущей даты.
 
     Возвращает: Объект или 404
     """
     post = get_object_or_404(
         Post,
-        pk=post_data["pk"],
+        pk=post_data["post_id"],
         pub_date__lte=timezone.now(),
         is_published=True,
         category__is_published=True,
