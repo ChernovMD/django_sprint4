@@ -4,7 +4,6 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now
 from django.views.generic import (
-    ListView,
     DetailView,
     UpdateView,
     CreateView,
@@ -18,99 +17,65 @@ from .forms import UserEditForm, PostEditForm, CommentEditForm
 from django.utils import timezone
 
 
-class MainPostListView(ListView):
-    """Главная страница со списком постов.
+from django.views import View
+from django.shortcuts import render
+from core.utils import get_page
 
-    Attributes:
-        - model: Класс модели, используемой для получения данных.
-        - template_name: Имя шаблона, используемого для отображения страницы.
-        - queryset: Запрос, определяющий список постов для отображения.
-        - paginate_by: Количество постов, отображаемых на одной странице.
-    """
 
-    model = Post
+class MainPostListView(View):
+    """Главная страница со списком постов с ручной пагинацией."""
+
     template_name = "blog/index.html"
     paginate_by = 10
 
-    def get_queryset(self):
-        return post_published_query()
+    def get(self, request, *args, **kwargs):
+        queryset = post_published_query()
+        page_obj = get_page(request, queryset, self.paginate_by)
+        return render(request, self.template_name, {"page_obj": page_obj})
 
 
-class CategoryPostListView(MainPostListView):
-    """Страница со списком постов выбранной категории.
-
-    Атрибуты:
-        - template_name: Имя шаблона, используемого для отображения страницы.
-        - category: Выбранная категория.
-
-    Методы:
-        - get_queryset(): Возвращает список постов в выбранной категории.
-        - get_context_data(**kwargs): Возвращает контекстные данные для
-        шаблона.
-    """
-
+class CategoryPostListView(View):
     template_name = "blog/category.html"
-    category = None
+    paginate_by = 10
 
-    def get_queryset(self):
-        slug = self.kwargs["category_slug"]
-        self.category = \
-            get_object_or_404(Category, slug=slug, is_published=True)
-        return super().get_queryset().filter(category=self.category)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["category"] = self.category
-        context["extra_categories"] = Category.objects.filter(
+    def get(self, request, *args, **kwargs):
+        category = get_object_or_404(
+            Category, slug=self.kwargs["category_slug"], is_published=True
+        )
+        queryset = post_published_query().filter(category=category)
+        page_obj = get_page(request, queryset, self.paginate_by)
+        extra_categories = Category.objects.filter(
             slug__in=["news", "science", "travel"], is_published=True
         )
-        return context
+        return render(
+            request,
+            self.template_name,
+            {
+                "page_obj": page_obj,
+                "category": category,
+                "extra_categories": extra_categories,
+            },
+        )
 
 
-class UserPostsListView(MainPostListView):
-    """Страница со списком постов пользователя.
-
-    Атрибуты:
-        - template_name: Имя шаблона, используемого для отображения страницы.
-        - author: Автор постов.
-
-    Методы:
-        - get_queryset(): Возвращает список постов автора.
-        - get_context_data(**kwargs): Возвращает контекстные данные для
-        шаблона.
-    """
-
+class UserPostsListView(View):
     template_name = "blog/profile.html"
-    author = None
+    paginate_by = 10
 
-    def get_queryset(self):
-        username = self.kwargs["username"]
-        self.author = get_object_or_404(User, username=username)
-        if self.author == self.request.user:
-            return post_all_query().filter(author=self.author)
-        return super().get_queryset().filter(author=self.author)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["profile"] = self.author
-        return context
+    def get(self, request, *args, **kwargs):
+        author = get_object_or_404(User, username=self.kwargs["username"])
+        if author == request.user:
+            queryset = post_all_query().filter(author=author)
+        else:
+            queryset = post_published_query().filter(author=author)
+        page_obj = get_page(request, queryset, self.paginate_by)
+        return render(
+            request, self.template_name,
+            {"page_obj": page_obj, "profile": author}
+        )
 
 
 class PostDetailView(DetailView):
-    """Страница выбранного поста.
-
-    Атрибуты:
-        - model: Класс модели, используемой для получения данных.
-        - template_name: Имя шаблона, используемого для отображения страницы.
-        - post_data: Объект поста.
-
-    Методы:
-        - get_queryset(): Возвращает пост.
-        - get_context_data(**kwargs): Возвращает контекстные данные для
-        шаблона.
-        - check_post(): Возвращает результат проверки поста.
-    """
-
     model = Post
     template_name = "blog/detail.html"
     post_data = None
@@ -127,7 +92,7 @@ class PostDetailView(DetailView):
         if self.check_post_data():
             context["flag"] = True
             context["form"] = CommentEditForm()
-        context["comments"] = \
+        context["comments"] =\
             self.object.comments.all().select_related("author")
         return context
 
