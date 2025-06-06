@@ -6,21 +6,18 @@ from blog.models import Post
 
 
 def post_all_query():
-    """Вернуть все посты."""
-    query_set = (
-        Post.objects.select_related(
-            "category",
-            "location",
-            "author",
-        )
-        .annotate(comment_count=Count("comments"))
-        .order_by("-pub_date")
-    )
-    return query_set
+    """Вернуть все посты с аннотацией количества комментариев."""
+    query_set = Post.objects.select_related(
+        "category",
+        "location",
+        "author",
+    ).order_by("-pub_date")
+
+    return annotate_comment_count(query_set)
 
 
 def post_published_query():
-    """Вернуть опубликованные посты."""
+    """Вернуть опубликованные посты с аннотацией количества комментариев."""
     query_set = post_all_query().filter(
         pub_date__lte=timezone.now(),
         is_published=True,
@@ -51,3 +48,10 @@ def get_post_data(post_data):
         category__is_published=True,
     )
     return post
+
+
+from django.db.models import Count
+
+def annotate_comment_count(queryset):
+    """Добавить аннотацию количества комментариев к постам."""
+    return queryset.annotate(comment_count=Count("comments"))
